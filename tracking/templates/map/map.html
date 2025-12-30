@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevALIGhasemi - موقعیت‌ها</title>
+  
+  <!-- فونت زیبا  - DevALIGhasemi-->
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0d1117, #0a192f);
+      color: #e0e0e0;
+      font-family: "Vazirmatn", "Segoe UI", sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #00b4ff;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    table {
+      background-color: rgba(17, 25, 40, 0.9);
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 123, 255, 0.3);
+    }
+
+    th, td {
+      color: #e0e0e0;
+      text-align: center;
+      padding: 12px;
+    }
+
+    th {
+      background: #0a192f;
+      border-bottom: 1px solid #00b4ff;
+    }
+
+    tr:hover {
+      background: rgba(0, 180, 255, 0.1);
+      cursor: pointer;
+    }
+
+    .modal-content {
+      background-color: #0d1117;
+      color: #e0e0e0;
+      border-radius: 15px;
+      border: none;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #00b4ff;
+    }
+
+    .modal-title {
+      color: #00b4ff;
+      font-weight: bold;
+    }
+
+    .modal-body img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 2px solid #00b4ff;
+    }
+
+    .btn-custom {
+      background: linear-gradient(135deg, #007bff, #00b4ff);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .btn-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 180, 255, 0.6);
+    }
+
+    .pagination {
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .modal-body img {
+  max-width: 150px;   /* کوچک‌تر از حالت پیش‌فرض */
+  height: auto;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #00b4ff;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+  </style>
+</head>
+<body>
+
+<h1>تمام موقعیت‌های کاربر</h1>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>نام ماشین</th>
+      <th>زمان</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for location in page_obj %}
+    <tr data-id="{{ location.id }}"
+        data-name="{{ location.name }}"
+        data-lat="{{ location.latitude }}"
+        data-lon="{{ location.longitude }}"
+        data-timestamp="{{ location.timestamp }}"
+        data-image="{% static 'img/car.png' %}"  >
+      <td>{{ location.name }}</td>
+      <td>{{ location.timestamp|date:"Y-m-d H:i:s" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link btn-custom" href="?page={{ page_obj.previous_page_number }}">قبلی</a>
+      </li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link btn-custom" href="?page={{ page_obj.next_page_number }}">بعدی</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+
+<button class="btn-custom" onclick="window.history.back()">بازگشت</button>
+
+<!-- Modal برای نمایش جزئیات کامل  - DevALIGhasemi-->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title">جزئیات موقعیت</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <img id="carImage" src="" alt="تصویر ماشین">
+        <p><strong>ID:</strong> <span id="locId"></span></p>
+        <p><strong>نام ماشین:</strong> <span id="locName"></span></p>
+        <p><strong>Latitude:</strong> <span id="locLat"></span></p>
+        <p><strong>Longitude:</strong> <span id="locLon"></span></p>
+        <p><strong>Timestamp:</strong> <span id="locTime"></span></p>
+        <a id="googleMapsLink" target="_blank" class="btn btn-custom">نمایش در Google Maps</a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-custom" data-bs-dismiss="modal">بستن</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS + Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+
+  document.querySelectorAll("tbody tr").forEach(row => {
+    row.addEventListener("click", () => {
+      document.getElementById("locId").textContent = row.dataset.id;
+      document.getElementById("locName").textContent = row.dataset.name;
+      document.getElementById("locLat").textContent = row.dataset.lat;
+      document.getElementById("locLon").textContent = row.dataset.lon;
+      document.getElementById("locTime").textContent = row.dataset.timestamp;
+      document.getElementById("carImage").src = row.dataset.image;
+
+      document.getElementById("googleMapsLink").href = `https://www.google.com/maps/place/${row.dataset.lat}+${row.dataset.lon}/`;
+
+      modal.show();
+    });
+  });
+</script>
+
+</body>
+</html>
